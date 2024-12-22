@@ -19,7 +19,7 @@ fn parse_inputs(input: &str) -> Vec<Vec<char>> {
         
 }
 
-fn count_occurences(inp: &Vec<Vec<char>>, ) -> usize {
+fn count_xmas(inp: &Vec<Vec<char>>, ) -> usize {
     let rows = inp.len();
     let cols = inp[0].len();
     let mut count = 0;
@@ -96,7 +96,7 @@ fn count_x_mas(grid: &[Vec<char>]) -> usize {
 
 #[aoc(day4, part1)]
 fn part1(inp: &Vec<Vec<char>>) -> usize {
-    count_occurences(inp)
+    count_xmas(inp)
 }
 
 #[aoc(day4, part2)]
