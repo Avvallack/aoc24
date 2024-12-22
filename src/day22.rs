@@ -63,7 +63,7 @@ fn get_last_digits(sec_nums: &Vec<i128>, i: isize) -> Vec<Vec<i32>> {
     sec_nums.iter().map(|sn| get_i_iteration_last_digit(*sn, i)).collect::<Vec<_>>()
 }
 
-fn get_diffs(last_digits: &Vec<Vec<i32>>, i: isize) -> Vec<Vec<i32>> {
+fn get_diffs(last_digits: &Vec<Vec<i32>>) -> Vec<Vec<i32>> {
     last_digits.iter().map(|ld| get_diff(ld)).collect::<Vec<_>>()
 }
     
@@ -72,7 +72,7 @@ fn get_best_sequence(secret_numbers: &Vec<i128>) -> (HashMap<Vec<i32>, i32>, i32
     let mut best_changes =HashMap::new();
     
     let ld = get_last_digits(secret_numbers, 2000);
-    let diffs = get_diffs(&ld, 2000);
+    let diffs = get_diffs(&ld);
     for (digits, diff) in zip(ld, diffs) {
         let mut visited_seqs = HashMap::new();
         for i in 0..diff.len() - 4 {
