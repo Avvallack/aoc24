@@ -68,7 +68,7 @@ fn part_2 (inp: &Input) -> u64 {
     }
     let mut sums = Vec::new();
     for towel in possible {
-        let sum = count_tokenization(&towel, &inp.patterns);
+        let sum = count_tokenization(&towel, &inp.tokens);
         sums.push(sum);
     }
     sums.iter().sum::<u64>()
