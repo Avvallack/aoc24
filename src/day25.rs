@@ -13,7 +13,7 @@ struct Input {
 fn read_input(input: &str) -> Input {
     let mut keys = Vec::new();
     let mut locks = Vec::new();
-    let mut key_flag = false;
+    let mut key_flag;
     let chunks = input.split("\n\n").collect::<Vec<&str>>();
     for chunk in chunks {
         let lines = chunk.lines().collect::<Vec<&str>>();
