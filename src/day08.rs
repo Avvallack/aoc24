@@ -3,9 +3,14 @@ use std::collections::{HashMap, HashSet};
 use aoc_runner_derive::{aoc, aoc_generator};
 use pathfinding::prelude::Matrix;
 
+#[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
+struct Point {
+    x: usize,
+    y: usize,
+}
 
 struct Input {
-    points: HashMap<char, Vec<(usize, usize)>>,
+    points: HashMap<char, Vec<Point>>,
     grid: Matrix<char>,
 }
 
@@ -26,7 +31,7 @@ fn read_inputs(input: &str) -> Input {
         for c in 0..grid.columns {
             if grid[(r, c)] != '.' {
                 let entry = points.entry(grid[(r, c)]).or_insert(Vec::new());
-                entry.push((r, c));
+                entry.push(Point{x: c, y: r});
             }
         }
     }
@@ -36,14 +41,14 @@ fn read_inputs(input: &str) -> Input {
     }
 }
 
-fn get_antinodes(p1: &(usize, usize), p2: &(usize, usize), max_y: usize, max_x: usize) -> Vec<(usize, usize)> {
-    let dx = p2.1 as i32 - p1.1 as i32;
-    let dy = p2.0 as i32 - p1.0 as i32;
+fn get_antinodes(p1: &Point, p2: &Point, max_y: usize, max_x: usize) -> Vec<(usize, usize)> {
+    let dx = p2.x as i32 - p1.x as i32;
+    let dy = p2.y as i32 - p1.y as i32;
 
     let mut antinodes = vec![];
     for &t in &[-1, 2] {
-        let px: i32 = p1.1 as i32 + t * dx;
-        let py = p1.0 as i32 + t * dy;
+        let px: i32 = p1.x as i32 + t * dx;
+        let py = p1.y as i32 + t * dy;
         if px >= 0 && px < max_x as i32 && py >= 0 && py < max_y as i32 {
             antinodes.push((py as usize, px as usize));
         }
@@ -52,7 +57,7 @@ fn get_antinodes(p1: &(usize, usize), p2: &(usize, usize), max_y: usize, max_x: 
     antinodes
 }
 
-fn get_antinodes_harmonics(points: &Vec<(usize, usize)>, max_y: usize, max_x: usize) -> Vec<(usize, usize)> {
+fn get_antinodes_harmonics(points: &Vec<Point>, max_y: usize, max_x: usize) -> Vec<Point> {
     let mut unique_antinodes = HashSet::new();
 
     for i in 0..points.len() {
@@ -66,37 +71,36 @@ fn get_antinodes_harmonics(points: &Vec<(usize, usize)>, max_y: usize, max_x: us
         }
     }
 
-    unique_antinodes.into_iter().map(|(x, y)| (x as usize, y as usize)).collect()
-
+    unique_antinodes.into_iter().collect()
 }
 
-fn get_line_points_in_bounds(p1: &(usize, usize), p2: &(usize, usize), max_x: usize, max_y: usize) -> Vec<(usize, usize)> {
-    let dx = p2.1 as i32 - p1.1 as i32;
-    let dy = p2.0 as i32 - p1.0 as i32;
+fn get_line_points_in_bounds(p1: &Point, p2: &Point, max_x: usize, max_y: usize) -> Vec<Point> {
+    let dx = p2.x as i32 - p1.x as i32;
+    let dy = p2.y as i32 - p1.y as i32;
     let g = gcd(dx, dy);
     let dxr = dx / g;
     let dyr = dy / g;
 
     let mut points = vec![];
-    let mut x = p1.1 as i32;
-    let mut y = p1.0 as i32;
+    let mut x = p1.x as i32;
+    let mut y = p1.y as i32;
     loop {
         x += dxr;
         y += dyr;
         if x < 0 || x >= max_x as i32 || y < 0 || y >= max_y as i32 {
             break;
         }
-        points.push((y as usize, x as usize));
+        points.push(Point {x: x as usize, y: y as usize});
     }
-    x = p1.1 as i32;
-    y = p1.0 as i32;
+    x = p1.x as i32;
+    y = p1.y as i32;
     loop {
         x -= dxr;
         y -= dyr;
         if x < 0 || x >= max_x as i32 || y < 0 || y >= max_y as i32 {
             break;
         }
-        points.push((x as usize, y as usize));
+        points.push(Point {x: x as usize, y: y as usize});
     }
 
     points
