@@ -3,11 +3,12 @@ use std::collections::{HashMap, HashSet};
 use aoc_runner_derive::{aoc, aoc_generator};
 
 struct Region {
-    plant_type: char,
+    _plant_type: char,
     plots: HashMap<(usize, usize), Plot>,
     sides: usize,
     visited_sides: HashSet<(usize, usize, Direction)>,
 }
+
 struct Plot {
     perimiters: usize,
 }
@@ -239,13 +240,13 @@ fn get_regions(grid: &Vec<Vec<char>>) -> Vec<Region> {
     let mut visited = HashSet::new();
     let mut regions = Vec::new();
     for (y, row) in grid.iter().enumerate() {
-        for (x, plot) in row.iter().enumerate() {
+        for (x, _plot) in row.iter().enumerate() {
             let Some(plant_type) = get_plant_type(x, y, &grid) else {
                 continue;
             };
             if !visited.contains(&(x, y)) {
                 let mut next_region = Region {
-                    plant_type,
+                    _plant_type: plant_type,
                     plots: HashMap::new(),
                     sides: 0,
                     visited_sides: HashSet::new(),
