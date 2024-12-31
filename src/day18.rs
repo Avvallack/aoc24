@@ -24,19 +24,6 @@ fn parse_input(inp: &str) -> Input {
     Input { field, bites }
 }
 
-fn visualise_field(field: &[[i32; 71]; 71]) {
-    for row in field.iter() {
-        for cell in row.iter() {
-            if *cell == 0 {
-                print!(".");
-            } else {
-                print!("#");
-            }
-        }
-        println!();
-    }
-}
-
 fn get_neighbors(field: &[[i32; 71]; 71], x: usize, y: usize) -> Vec<(usize, usize)> {
     let mut neighbors = Vec::new();
     let directions = [(0isize, 1isize), (1, 0), (0, -1), (-1, 0)];
@@ -168,7 +155,6 @@ mod tests {
     #[test]
     fn test_part1() {
         let input = parse_input(TEST_INPUT);
-        visualise_field(&input.field);
         println!();
         assert_eq!(part1(&input), Some(146));
     }
