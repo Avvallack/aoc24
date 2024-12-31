@@ -1,9 +1,10 @@
-use std::{clone, collections::HashMap};
+use std::collections::{HashMap, HashSet};
 
 use aoc_runner_derive::{aoc, aoc_generator};
+use itertools::Itertools;
 use regex::Regex;
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, Hash, PartialEq, Eq)]
 enum Operator {
     AND,
     OR,
@@ -106,48 +107,6 @@ fn process_instructions(input: &Input) -> (HashMap<String, u16>, HashMap<String,
     (wires, result_wires)
 }
 
-fn get_desired_result(wires: &HashMap<String, u16>) -> String {
-    let mut result = 0;
-    let mut x_s = Vec::new();
-    let mut y_s = Vec::new();
-    for (key, value) in wires {
-        if key.starts_with("x") {
-            x_s.push((key, value));
-        } else if key.starts_with("y") {
-            y_s.push((key, value));
-        }
-    }
-    x_s.sort_by(|a, b| {
-        let a_num = a.0[1..].parse::<u32>().unwrap();
-        let b_num = b.0[1..].parse::<u32>().unwrap();
-        b_num.cmp(&a_num)
-    });
-    y_s.sort_by(|a, b| {
-        let a_num = a.0[1..].parse::<u32>().unwrap();
-        let b_num = b.0[1..].parse::<u32>().unwrap();
-        b_num.cmp(&a_num)
-    });
-
-    let mut binary_string_x = String::new();
-    for (key, value) in x_s {
-        binary_string_x.push_str(&value.to_string());
-    }
-    let mut binary_string_y = String::new();
-    for (key, value) in y_s {
-        binary_string_y.push_str(&value.to_string());
-    }
-
-    let int_x = u64::from_str_radix(&binary_string_x, 2).unwrap();
-    let int_y = u64::from_str_radix(&binary_string_y, 2).unwrap();
-
-    // Perform addition
-    let result = int_x + int_y;
-
-    // Convert result to binary string
-    format!("{:b}", result)
-    
-}
-
 fn get_string_from_wires(input: &Input) -> String {
     let (_, res_wires) = process_instructions(input);
     
@@ -167,13 +126,57 @@ fn get_string_from_wires(input: &Input) -> String {
     binary_string
 }
 
+fn get_addition(inp: &Input) -> String {
+    let mut invalid = HashSet::new();
+
+    for inst in &inp.instructions {
+        if inst.result.starts_with("z") && inst.op != Operator::XOR && inst.result != "z45" {
+            invalid.insert(inst.result.clone());
+        }
+        if inst.op == Operator::XOR 
+            && !['x', 'y', 'z'].contains(&inst.result.chars().next().unwrap())
+            && !['x', 'y', 'z'].contains(&inst.ina.chars().next().unwrap())
+            && !['x', 'y', 'z'].contains(&inst.inb.chars().next().unwrap())
+        {
+            invalid.insert(inst.result.clone());
+        }
+
+        if inst.op == Operator::AND && inst.ina != "x00" && inst.inb != "x00" {
+            for other_inst in &inp.instructions {
+                if (other_inst.ina == inst.result || other_inst.inb == inst.result) 
+                    && other_inst.op != Operator::OR 
+                {
+                    invalid.insert(inst.result.clone());
+                }
+            }
+        }
+
+        if inst.op ==Operator::XOR {
+            for other_inst in &inp.instructions {
+                if (other_inst.ina == inst.result || other_inst.inb == inst.result) 
+                    && other_inst.op == Operator::OR 
+                {
+                    invalid.insert(inst.result.clone());
+                }
+            }
+        }
+        
+    }
+
+    invalid.iter().sorted().join(",")
+
+}
+
 #[aoc(day24, part1)]
 fn part1(input: &Input) -> u64 {
     let binary_string = get_string_from_wires(input);
     u64::from_str_radix(&binary_string, 2).unwrap()
 }
 
-
+#[aoc(day24, part2)]
+fn part2(input: &Input) -> String {
+    get_addition(input)
+}
 
 #[cfg(test)]
 mod tests{
@@ -238,19 +241,6 @@ hwm AND bqk -> z03
 tgd XOR rvg -> z12
 tnw OR pbm -> gnj";
 
-    const TEST_INPUT3: &str = "x00: 1
-x01: 1
-x02: 0
-x03: 1
-y00: 1
-y01: 0
-y02: 1
-y03: 1
-
-x00 AND y00 -> z00
-x01 XOR y01 -> z01
-x02 OR y02 -> z02";
-
     #[test]
     fn test_part1() {
         let input = read_inputs(TEST_INPUT);
@@ -263,9 +253,5 @@ x02 OR y02 -> z02";
         assert_eq!(part1(&input), 2024);
     }
 
-    #[test]
-    fn test_addition(){
-        let input = read_inputs(TEST_INPUT3);
-        assert_eq!(get_desired_result(&input.start_wires), "11000");
-    }
+    
 }
